@@ -6,6 +6,9 @@
     --lime: #A3E635;
     --white: #F8FAFC;
     --muted: #94A3B8;
+    --radius:   12px;
+    --font-h:   'Space Grotesk', sans-serif;
+    --font-b:   'Inter', sans-serif;
 }
 
 *, *::before, *::after {
@@ -19,4 +22,65 @@ body {
     background: var(--bg);
     color: var(--white);
     font-family: sans-serif;
+}
+
+/* кнопки */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; padding: 10px 20px;
+    border-radius: 9px;
+    font-family: var(--font-b);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all .15s;
+    text-decoration: none;
+}
+.btn-primary {
+    background: var(--purple);
+    color: var(--white);
+}
+.btn-lime {
+    background: var(--lime);
+    color: #0F1629;
+    font-weight: 700;
+}
+.btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--white);
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+}
+
+.input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--white);
+    font-family: var(--font-b);
+    font-size: 14px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color .2s;
+}
+
+/* утилиты */
+.flex {
+    display: flex;
+}
+.text-muted {
+    color: var(--muted);
+}
+.font-h {
+    font-family: var(--font-h);
 }
