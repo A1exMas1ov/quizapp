@@ -1,0 +1,22 @@
+:root {
+    --bg: #0F1629;
+    --surface: #1A2340;
+    --border: #2A3556;
+    --purple: #7C3AED;
+    --lime: #A3E635;
+    --white: #F8FAFC;
+    --muted: #94A3B8;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+
+}
+
+body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: sans-serif;
+}
