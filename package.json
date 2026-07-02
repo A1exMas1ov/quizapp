@@ -1,5 +1,13 @@
 {
     "name": "quizapp",
     "version": "1.0.0",
-    "main": "index.js"
+    "main": "index.js",
+    "dependencies": {
+        "express": "^5.x",
+        "bcryptjs": "^3.x",
+        "jsonwebtoken": "^9.x",
+        "ws": "^8.x",
+        "@libsql/client": "^0.17.x",
+        "cookie-parser": "^1.x"
+    }
 }
