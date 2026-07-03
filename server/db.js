@@ -85,3 +85,5 @@ async function initDB() {
     `);
     console.log('[DB] Schema ready');
 }
+
+module.exports = { db, initDB };

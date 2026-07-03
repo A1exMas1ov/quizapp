@@ -295,13 +295,3 @@ function setupWebSocket(wss) {
     });
   });
 }
-
-function forceCloseRoom(sessionId, reason = 'Организатор завершил квиз') {
-  const room = rooms.get(sessionId);
-  if (!room) return;
-  if (room.timer) { clearTimeout(room.timer); room.timer = null; }
-  broadcast(room, { type: 'quiz_cancelled', reason });
-  rooms.delete(sessionId);
-}
-
-module.exports = { setupWebSocket, forceCloseRoom };
