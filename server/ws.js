@@ -47,12 +47,11 @@ async function sendQuestion(room, sessionId) {
 
   const timeLimit = q.time_limit || room.quiz.time_per_question || 30;
 
-  // Send question to all (hide is_correct for participants)
   const participantQ = {
     ...q,
-    answers: q.answers.map(a => ({ id: a.id, text: a.text })) // no is_correct
+    answers: q.answers.map(a => ({ id: a.id, text: a.text }))
   };
-  const organizerQ = { ...q }; // organizer sees everything
+  const organizerQ = { ...q };
 
   const payload = {
     type: 'question',
@@ -63,16 +62,13 @@ async function sendQuestion(room, sessionId) {
     questionStartTime: room.questionStartTime
   };
 
-  // To participants
   for (const ws of room.participants.values()) {
     safeSend(ws, JSON.stringify(payload));
   }
-  // To organizer
   if (room.organizer) {
     safeSend(room.organizer, JSON.stringify({ ...payload, question: organizerQ }));
   }
 
-  // Auto-advance after time limit
   if (room.timer) clearTimeout(room.timer);
   room.timer = setTimeout(() => endQuestion(room, sessionId), timeLimit * 1000 + 500);
 }
@@ -82,7 +78,6 @@ async function endQuestion(room, sessionId) {
   const q = room.questions[room.currentIdx];
   if (!q) return;
 
-  // Gather answer distribution
   const dist = await db.execute({
     sql: `SELECT pa.answer_ids, COUNT(*) as cnt FROM participant_answers pa
           WHERE pa.session_id=? AND pa.question_id=? GROUP BY pa.answer_ids`,
@@ -200,7 +195,7 @@ function setupWebSocket(wss) {
 
       if (user.role === 'organizer') {
         if (msg.type === 'start_quiz') {
-          if (room.currentIdx >= 0) return; // already started, ignore duplicate start
+          if (room.currentIdx >= 0) return;
           if (!room.quiz) {
             const data = await loadQuizData(sessionId);
             if (data) { room.quiz = data.quiz; room.questions = data.questions; }
@@ -231,6 +226,56 @@ function setupWebSocket(wss) {
       }
 
       if (user.role === 'participant') {
+        if (msg.type === 'submit_answer') {
+          const { questionId, answerIds } = msg;
+          if (!questionId || !answerIds) return;
+
+          const q = room.questions[room.currentIdx];
+          if (!q || q.id !== questionId) return;
+          if (room.answeredUsers?.has(user.id)) return;
+
+          if (!room.answeredUsers) room.answeredUsers = new Set();
+          room.answeredUsers.add(user.id);
+
+          const correctIds = q.answers.filter(a => a.is_correct).map(a => a.id);
+          const submitted = Array.isArray(answerIds) ? answerIds.map(Number) : [Number(answerIds)];
+          const isCorrect = correctIds.length === submitted.length &&
+            submitted.every(id => correctIds.includes(id));
+
+          let score = 0;
+          if (isCorrect) {
+            const elapsed = Date.now() - (room.questionStartTime || Date.now());
+            const timeLimit = (q.time_limit || room.quiz?.time_per_question || 30) * 1000;
+            const speedRatio = Math.max(0, 1 - elapsed / timeLimit);
+            score = room.quiz?.score_by_speed ? Math.round(800 + 200 * speedRatio) : 1000;
+          }
+
+          await db.execute({
+            sql: 'INSERT INTO participant_answers(session_id,user_id,question_id,answer_ids,is_correct,score,answered_at_ms) VALUES(?,?,?,?,?,?,?)',
+            args: [sessionId, user.id, questionId, JSON.stringify(submitted), isCorrect?1:0, score, Date.now()]
+          });
+          if (score > 0) {
+            await db.execute({
+              sql: 'UPDATE session_participants SET total_score=total_score+? WHERE session_id=? AND user_id=?',
+              args: [score, sessionId, user.id]
+            });
+          }
+
+          safeSend(ws, JSON.stringify({ type: 'answer_received', isCorrect, score, correctAnswerIds: correctIds }));
+
+          if (room.organizer) {
+            safeSend(room.organizer, JSON.stringify({
+              type: 'answer_progress',
+              answered: room.answeredUsers.size,
+              total: room.participants.size
+            }));
+          }
+
+          if (room.answeredUsers.size >= room.participants.size && room.timer) {
+            clearTimeout(room.timer);
+            setTimeout(() => endQuestion(room, sessionId), 800);
+          }
+        }
       }
     });
 
