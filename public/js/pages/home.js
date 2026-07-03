@@ -51,7 +51,7 @@ const HomePage = {
         </div>
       `;
     } else {
-      heroTitle = `Проводи квизы,<br>которые <em>запоминают</em>`;
+      heroTitle = `Проводи квизы и побеждай`;
       heroSub = 'Создавай вопросы, запускай игры по коду комнаты и следи за результатами вживую';
       heroCard = `
         <div class="room-card">
@@ -70,71 +70,14 @@ const HomePage = {
     }
 
     app.innerHTML = `
-      <style>
-        .home-nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 60px; border-bottom: 1px solid var(--border); position: sticky; top:0; background: rgba(15,22,41,.92); backdrop-filter: blur(12px); z-index: 100; }
-        .home-nav .nav-links { display:flex; gap:32px; }
-        .home-nav .nav-links a { color:var(--muted); text-decoration:none; font-size:14px; font-weight:500; }
-        .home-nav .nav-links a:hover { color:var(--white); }
-        .nav-actions { display:flex; gap:12px; align-items:center; }
-        .hero { display:flex; flex-direction:column; align-items:center; text-align:center; padding:100px 60px 80px; position:relative; overflow:hidden; }
-        .hero::before { content:''; position:absolute; top:-120px; left:50%; transform:translateX(-50%); width:700px; height:700px; background:radial-gradient(circle, rgba(124,58,237,.18) 0%, transparent 70%); pointer-events:none; }
-        .hero-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(163,230,53,.08); border:1px solid rgba(163,230,53,.25); color:var(--lime); padding:5px 14px; border-radius:999px; font-size:12px; font-weight:600; letter-spacing:.04em; margin-bottom:28px; }
-        .hero h1 { font-size:clamp(40px,6vw,72px); font-weight:700; line-height:1.08; letter-spacing:-.02em; max-width:800px; margin-bottom:22px; }
-        .hero h1 em { color:var(--purple-l); font-style:normal; }
-        .hero-sub { font-size:18px; color:var(--muted); max-width:520px; line-height:1.6; margin-bottom:52px; }
-        .room-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:36px 40px; width:100%; max-width:480px; position:relative; z-index:1; }
-        .room-card-label { font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:16px; }
-        .room-input-wrap { display:flex; gap:10px; margin-bottom:20px; }
-        .room-input { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--white); font-family:var(--font-h); font-size:22px; font-weight:600; letter-spacing:.15em; text-align:center; padding:14px 16px; outline:none; transition:border-color .2s; }
-        .room-input::placeholder { color:var(--border); letter-spacing:.1em; }
-        .room-input:focus { border-color:var(--purple); }
-        .btn-join { background:var(--lime); border:none; color:#0F1629; padding:14px 24px; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; white-space:nowrap; transition:background .2s; }
-        .btn-join:hover { background:#bef264; }
-        .divider { display:flex; align-items:center; gap:12px; color:var(--muted); font-size:13px; margin-bottom:20px; }
-        .divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
-        .auth-links { display:flex; gap:10px; }
-        .auth-links button { flex:1; }
-        .stats { display:flex; justify-content:center; gap:64px; padding:60px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
-        .stat-item { text-align:center; }
-        .stat-num { font-size:40px; font-weight:700; }
-        .stat-num span { color:var(--purple-l); }
-        .stat-desc { color:var(--muted); font-size:14px; margin-top:4px; }
-        .features { padding:80px 60px; max-width:1200px; margin:0 auto; }
-        .features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-        .feat-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:28px; transition:border-color .2s; }
-        .feat-card:hover { border-color:var(--purple); }
-        .feat-icon { width:44px; height:44px; background:rgba(124,58,237,.15); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:18px; }
-        .feat-card h3 { font-size:17px; font-weight:600; margin-bottom:8px; }
-        .feat-card p { color:var(--muted); font-size:14px; line-height:1.6; }
-        footer { border-top:1px solid var(--border); padding:32px 60px; display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:13px; }
-        @media (max-width:768px) {
-          .home-nav, .hero, .features, footer { padding-left:20px; padding-right:20px; }
-          .home-nav .nav-links { display:none; }
-          .features-grid { grid-template-columns:1fr; }
-          .stats { flex-wrap:wrap; gap:32px; }
-        }
-      </style>
-
-      <nav class="home-nav">
+<nav class="home-nav">
         <div class="logo" onclick="Router.navigate('/')">Quiz<span class="dot">App</span></div>
-        <div class="nav-links">
-          <a href="#features">Возможности</a>
-          <a href="#">Категории</a>
-          <a href="#">О проекте</a>
-        </div>
         <div class="nav-actions">${navActions}</div>
       </nav>
 
-      <section class="hero">
-        <div class="hero-badge"><span class="pulse-dot"></span> Квизы в реальном времени</div>
-        <h1>${heroTitle}</h1>
-        <p class="hero-sub">${heroSub}</p>
-        ${heroCard}
-      </section>
-
-      <footer>
+      <footer class="home-footer">
         <div class="logo" style="font-size:16px">Quiz<span class="dot">App</span></div>
-        <span>© 2025 QuizApp</span>
+        <span>© 2026 QuizApp</span>
       </footer>
     `;
 
