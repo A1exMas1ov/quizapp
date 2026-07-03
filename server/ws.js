@@ -23,6 +23,93 @@ function getRoom(sessionId) {
   return rooms.get(sessionId);
 }
 
+async function loadQuizData(sessionId) {
+  const sr = await db.execute({ sql: 'SELECT * FROM sessions WHERE id=?', args: [sessionId] });
+  if (!sr.rows.length) return null;
+  const session = sr.rows[0];
+  const qr = await db.execute({ sql: 'SELECT * FROM quizzes WHERE id=?', args: [session.quiz_id] });
+  if (!qr.rows.length) return null;
+  const quiz = qr.rows[0];
+  const questions = await db.execute({ sql: 'SELECT * FROM questions WHERE quiz_id=? ORDER BY order_num', args: [quiz.id] });
+  const qs = questions.rows;
+  for (const q of qs) {
+    const ans = await db.execute({ sql: 'SELECT * FROM answers WHERE question_id=?', args: [q.id] });
+    q.answers = ans.rows;
+  }
+  return { session, quiz, questions: qs };
+}
+
+async function sendQuestion(room, sessionId) {
+  const q = room.questions[room.currentIdx];
+  if (!q) return;
+  room.questionStartTime = Date.now();
+  room.answeredUsers = new Set();
+
+  const timeLimit = q.time_limit || room.quiz.time_per_question || 30;
+
+  // Send question to all (hide is_correct for participants)
+  const participantQ = {
+    ...q,
+    answers: q.answers.map(a => ({ id: a.id, text: a.text })) // no is_correct
+  };
+  const organizerQ = { ...q }; // organizer sees everything
+
+  const payload = {
+    type: 'question',
+    question: participantQ,
+    questionIndex: room.currentIdx,
+    totalQuestions: room.questions.length,
+    timeLimit,
+    questionStartTime: room.questionStartTime
+  };
+
+  // To participants
+  for (const ws of room.participants.values()) {
+    safeSend(ws, JSON.stringify(payload));
+  }
+  // To organizer
+  if (room.organizer) {
+    safeSend(room.organizer, JSON.stringify({ ...payload, question: organizerQ }));
+  }
+
+  // Auto-advance after time limit
+  if (room.timer) clearTimeout(room.timer);
+  room.timer = setTimeout(() => endQuestion(room, sessionId), timeLimit * 1000 + 500);
+}
+
+async function endQuestion(room, sessionId) {
+  if (room.timer) { clearTimeout(room.timer); room.timer = null; }
+  const q = room.questions[room.currentIdx];
+  if (!q) return;
+
+  // Gather answer distribution
+  const dist = await db.execute({
+    sql: `SELECT pa.answer_ids, COUNT(*) as cnt FROM participant_answers pa
+          WHERE pa.session_id=? AND pa.question_id=? GROUP BY pa.answer_ids`,
+    args: [sessionId, q.id]
+  });
+
+  const correctIds = q.answers.filter(a => a.is_correct).map(a => a.id);
+
+  broadcast(room, {
+    type: 'question_end',
+    questionId: q.id,
+    correctAnswerIds: correctIds,
+    distribution: dist.rows,
+    leaderboard: await getLeaderboard(sessionId)
+  });
+}
+
+async function getLeaderboard(sessionId) {
+  const r = await db.execute({
+    sql: `SELECT u.id, u.name, sp.total_score
+          FROM session_participants sp JOIN users u ON u.id=sp.user_id
+          WHERE sp.session_id=? ORDER BY sp.total_score DESC LIMIT 10`,
+    args: [sessionId]
+  });
+  return r.rows;
+}
+
 function setupWebSocket(wss) {
   wss.on('connection', async (ws, req) => {
     const url = new URL(req.url, 'http://localhost');
@@ -112,6 +199,35 @@ function setupWebSocket(wss) {
       try { msg = JSON.parse(raw); } catch { return; }
 
       if (user.role === 'organizer') {
+        if (msg.type === 'start_quiz') {
+          if (room.currentIdx >= 0) return; // already started, ignore duplicate start
+          if (!room.quiz) {
+            const data = await loadQuizData(sessionId);
+            if (data) { room.quiz = data.quiz; room.questions = data.questions; }
+          }
+          room.currentIdx = 0;
+          await db.execute({ sql: 'UPDATE sessions SET current_question_idx=0 WHERE id=?', args: [sessionId] });
+          broadcast(room, { type: 'quiz_started', totalQuestions: room.questions.length, quiz: { title: room.quiz?.title } });
+          await sendQuestion(room, sessionId);
+        }
+
+        if (msg.type === 'next_question') {
+          if (room.timer) { clearTimeout(room.timer); room.timer = null; }
+          room.currentIdx++;
+          if (room.currentIdx >= room.questions.length) {
+            await db.execute({ sql: "UPDATE sessions SET finished_at=datetime('now'),current_question_idx=? WHERE id=?", args: [room.currentIdx, sessionId] });
+            await db.execute({ sql: "UPDATE quizzes SET status='finished' WHERE id=?", args: [room.quiz.id] });
+            const lb = await getLeaderboard(sessionId);
+            broadcast(room, { type: 'quiz_finished', leaderboard: lb, session_id: sessionId });
+          } else {
+            await db.execute({ sql: 'UPDATE sessions SET current_question_idx=? WHERE id=?', args: [room.currentIdx, sessionId] });
+            await sendQuestion(room, sessionId);
+          }
+        }
+
+        if (msg.type === 'end_question_early') {
+          await endQuestion(room, sessionId);
+        }
       }
 
       if (user.role === 'participant') {
