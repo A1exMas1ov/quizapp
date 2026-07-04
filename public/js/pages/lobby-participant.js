@@ -24,7 +24,7 @@ const LobbyParticipantPage = {
           </div>
 
           <div class="badge badge-lime mb-24" style="padding:8px 18px;font-size:13px;">
-            <span id="pCount">0</span> участников уже в лобби
+            <span class="pulse-dot"></span> <span id="pCount">0</span> участников уже в лобби
           </div>
 
           <div class="mb-24">

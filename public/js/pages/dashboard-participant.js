@@ -32,7 +32,7 @@ const DashboardParticipantPage = {
     const avgAcc = total ? Math.round(history.reduce((s,h) => s + (h.correct_q / Math.max(h.total_q,1)), 0) / total * 100) : 0;
 
     document.getElementById('statsRow').outerHTML = `
-      <div id="statsRow" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+      <div id="statsRow" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
         <div class="card"><div class="text-sm text-muted mb-8">Квизов пройдено</div><div class="font-h" style="font-size:30px;font-weight:700;">${total}</div></div>
         <div class="card"><div class="text-sm text-muted mb-8">Средняя точность</div><div class="font-h" style="font-size:30px;font-weight:700;">${avgAcc}%</div></div>
         <div class="card"><div class="text-sm text-muted mb-8">Всего очков</div><div class="font-h" style="font-size:30px;font-weight:700;">${totalScore}</div></div>

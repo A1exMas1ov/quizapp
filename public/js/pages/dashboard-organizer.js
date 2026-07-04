@@ -73,7 +73,7 @@ const DashboardOrganizerPage = {
     const sessions = quizzes.reduce((s,q) => s + (q.session_count||0), 0);
 
     document.getElementById('statsRow').outerHTML = `
-      <div class="stats-row" id="statsRow" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+      <div class="stats-row" id="statsRow" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
         <div class="card"><div class="text-sm text-muted mb-8">Всего квизов</div><div class="font-h" style="font-size:30px;font-weight:700;">${total}</div></div>
         <div class="card"><div class="text-sm text-muted mb-8">Вопросов создано</div><div class="font-h" style="font-size:30px;font-weight:700;">${totalQuestions}</div></div>
         <div class="card"><div class="text-sm text-muted mb-8">Сессий проведено</div><div class="font-h" style="font-size:30px;font-weight:700;">${sessions}</div></div>

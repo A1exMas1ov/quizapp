@@ -83,7 +83,7 @@ const HomePage = {
 
       <footer class="home-footer">
         <div class="logo" style="font-size:16px">Quiz<span class="dot">App</span></div>
-        <span>© 2025 QuizApp</span>
+        <span>© 2026 QuizApp</span>
       </footer>
     `;
 

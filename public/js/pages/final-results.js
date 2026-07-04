@@ -76,7 +76,6 @@ const FinalResultsPage = {
     const colors = ['#F59E0B','#94A3B8','#B45309'];
     return `
       <div class="fr-pitem">
-        ${rank===0 ? '<div style="font-size:26px;margin-bottom:6px;">👑</div>' : ''}
         <div class="fr-avatar" style="width:${sizes[rank]}px;height:${sizes[rank]}px;font-size:${rank===0?22:16}px;border-color:${colors[rank]};background:${colors[rank]}22;color:${colors[rank]}">${AuthStore.initials(p.name)}</div>
         <div class="text-sm font-bold" style="margin-bottom:4px;">${escapeHtml(p.name)}</div>
         <div class="font-h mb-8" style="color:${colors[rank]};font-size:15px;font-weight:700;">${p.total_score}</div>

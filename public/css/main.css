@@ -516,6 +516,7 @@ textarea.input {
     transition: border-color .15s, background .15s, transform .1s;
     text-align: left;
     width: 100%;
+    color: var(--white)
 }
 
 .answer-btn:hover:not(:disabled) {

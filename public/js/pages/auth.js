@@ -14,10 +14,6 @@ const AuthPage = {
           <div class="left-content">
             <h2>Проводи квизы и побеждай</h2>
             <p>Присоединяйся к тысячам организаторам и участникам</p>
-            <div class="mini-stats">
-              <div class="mini-stat"><div class="num">12k</div><div class="lbl">Квизов</div></div>
-              <div class="mini-stat"><div class="num">84k</div><div class="lbl">Участников</div></div>
-            </div>
           </div>
         </div>
 
