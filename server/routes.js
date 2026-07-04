@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('./db');
 const { signToken, hashPassword, checkPassword, requireAuth, requireRole } = require('./auth');
+const { forceCloseRoom } = require('./ws');
 
 router.post('/auth/register', async (req, res) => {
   try {
@@ -230,6 +231,10 @@ router.post('/quizzes/:id/close', requireAuth, requireRole('organizer'), async (
       args: [quizId]
     });
     await db.execute({ sql: "UPDATE quizzes SET status='draft', room_code=NULL WHERE id=?", args: [quizId] });
+
+    for (const row of activeSessions.rows) {
+      forceCloseRoom(row.id);
+    }
 
     res.json({ ok: true });
   } catch(e) { res.status(500).json({ error: e.message }); }
