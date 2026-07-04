@@ -182,14 +182,36 @@ router.post('/quizzes/:id/launch', requireAuth, requireRole('organizer'), async 
     if (!qr.rows.length) return res.status(403).json({ error: 'Нет доступа' });
     const quiz = qr.rows[0];
 
-    let code = Math.random().toString(36).slice(2,6).toUpperCase();
-    await db.execute({ sql: 'UPDATE quizzes SET room_code=?, status=? WHERE id=?', args: [code, 'active', quizId] });
-    
+    if (quiz.status === 'active' && quiz.room_code) {
+      const existingSession = await db.execute({
+        sql: "SELECT id, current_question_idx FROM sessions WHERE quiz_id=? AND finished_at IS NULL ORDER BY started_at DESC LIMIT 1",
+        args: [quizId]
+      });
+      if (existingSession.rows.length) {
+        const s = existingSession.rows[0];
+        return res.json({
+          session_id: s.id,
+          room_code: quiz.room_code,
+          resumed: true,
+          current_question_idx: s.current_question_idx
+        });
+      }
+    }
+
+    let code;
+    for (let i = 0; i < 20; i++) {
+      code = Math.random().toString(36).slice(2,6).toUpperCase();
+      const exists = await db.execute({ sql: 'SELECT id FROM quizzes WHERE room_code=?', args: [code] });
+      if (!exists.rows.length) break;
+    }
+
+    await db.execute({ sql: 'UPDATE quizzes SET room_code=?,status=? WHERE id=?', args: [code, 'active', quizId] });
     const sr = await db.execute({
-        sql: 'INSERT INTO sessions(quiz_id, current_question_idx) VALUES(?, ?)',
-        args: [quizId, -1]
+      sql: 'INSERT INTO sessions(quiz_id,current_question_idx) VALUES(?,?)',
+      args: [quizId, -1]
     });
-    res.json({ session_id: sr.lastInsertRowid, room_code: code });
+    const sessionId = Number(sr.lastInsertRowid);
+    res.json({ session_id: sessionId, room_code: code });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
