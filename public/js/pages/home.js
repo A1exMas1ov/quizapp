@@ -75,9 +75,15 @@ const HomePage = {
         <div class="nav-actions">${navActions}</div>
       </nav>
 
+      <section class="hero">
+        <h1>${heroTitle}</h1>
+        <p class="hero-sub">${heroSub}</p>
+        ${heroCard}
+      </section>
+
       <footer class="home-footer">
         <div class="logo" style="font-size:16px">Quiz<span class="dot">App</span></div>
-        <span>© 2026 QuizApp</span>
+        <span>© 2025 QuizApp</span>
       </footer>
     `;
 

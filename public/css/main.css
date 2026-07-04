@@ -195,8 +195,7 @@ textarea.input {
     font-family: var(--font-h);
     font-size: 20px;
     font-weight: 700;
-    padding: 0 12px 28px;
-    border-bottom: 1px solid var(--border);
+    padding: 0 12px 0px;
     cursor: pointer;
 }
 
@@ -345,25 +344,6 @@ textarea.input {
     background: rgba(239,68,68,.12);
     border: 1px solid rgba(239,68,68,.2);
     color: var(--red);
-}
-
-.pulse-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: currentColor;
-    animation: pulse 1.6s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    50% {
-        opacity: .3;
-        transform: scale(.6);
-    }
 }
 
 .loading {
@@ -703,16 +683,6 @@ textarea.input {
     font-weight: 700;
     margin-bottom: 10px;
     border: 3px solid transparent;
-}
-
-#confetti {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
 }
 
 .flex {
