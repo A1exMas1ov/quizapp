@@ -11,7 +11,7 @@ const LobbyParticipantPage = {
 
     app.innerHTML = `
 <div class="lp-glow"></div>
-      <div class="logo" style="position:fixed; top:24px; left:40px;" onclick="Router.navigate('/')">QuizApp</div>
+      <div class="logo" style="position:fixed; top:24px; left:40px;" onclick="Router.navigate('/')">Quiz<span class="dot">App</span></div>
 
       <div class="lp-wrap">
         <div class="lp-card">
