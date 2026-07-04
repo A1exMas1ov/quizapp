@@ -1,13 +1,20 @@
 {
-    "name": "quizapp",
-    "version": "1.0.0",
-    "main": "index.js",
-    "dependencies": {
-        "express": "^5.x",
-        "bcryptjs": "^3.x",
-        "jsonwebtoken": "^9.x",
-        "ws": "^8.x",
-        "@libsql/client": "^0.17.x",
-        "cookie-parser": "^1.x"
-    }
+  "name": "quizapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@libsql/client": "^0.17.4",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "ws": "^8.21.0"
+  }
 }
